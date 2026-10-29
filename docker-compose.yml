@@ -1,95 +1,84 @@
-
-version: "3.8"
-
 services:
   jellystat-db:
     image: postgres:15.14
-    # Postgres 15 is what the upstream compose uses (minor may vary) [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
-    command: ["postgres", "-c", "max_connections=200"]
+    command:
+    - postgres
+    - -c
+    - max_connections=200
     environment:
-      POSTGRES_USER: ${postgres-user}          # required by Jellystat example compose [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
-      POSTGRES_PASSWORD: ${postgres-password}     # set a strong password
-      # POSTGRES_DB defaults to POSTGRES_USER if omitted; Jellystat defaults to jfstat if set on app side [3](https://github.com/CyferShepard/Jellystat)
+      POSTGRES_USER: jellystat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - jellystat-db-data:/var/lib/postgresql/data
+    - jellystat-swarm_jellystat-backup:/app/backend/backup-data
     networks:
-      - jellystat-net
+    - jellystat-net
     deploy:
       placement:
         constraints:
-          - node.labels.deployment.target.jellystat == true
+        - node.labels.deployment.target.jellystat == true
       restart_policy:
         condition: on-failure
       resources:
         limits:
-          cpus: "1.0"
+          cpus: '1.0'
           memory: 1G
         reservations:
-          cpus: "0.25"
+          cpus: '0.25'
           memory: 256M
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test:
+      - CMD-SHELL
+      - pg_isready -U $$POSTGRES_USER
       interval: 10s
       timeout: 5s
       retries: 5
-
   jellystat:
     image: cyfershepard/jellystat:latest
-    # Official image & tag per upstream examples and Docker Hub. Pin a version tag if you prefer. [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)[2](https://hub.docker.com/r/cyfershepard/jellystat)
     environment:
-      POSTGRES_USER: ${postgres-user}          # must match the DB user [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
-      POSTGRES_PASSWORD: ${postgres-password}     # must match the DB password [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
-      POSTGRES_IP: jellystat-db        # service name used as host inside the overlay network [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
-      POSTGRES_PORT: "5432"            # default postgres port [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
-      # Optional: POSTGRES_DB: jfstat  # Jellystat supports overriding DB name; default is jfstat [3](https://github.com/CyferShepard/Jellystat)
-      JWT_SECRET: "kuvnlQN5eZdUFFDVhTFUTuR1UZDTPuOhfmEI4XdIQG9koPSTLkPFrermR1p7qLjdzAC2NQrF"  # required by Jellystat [3](https://github.com/CyferShepard/Jellystat)
-      TZ: "America/Chicago"                    # set to your timezone, e.g., America/Chicago [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
-      # Advanced/optional envs (uncomment as needed) per README:
-      # JS_LISTEN_IP: "0.0.0.0"         # listen IP; default is 0.0.0.0 [3](https://github.com/CyferShepard/Jellystat)
-      # POSTGRES_SSL_ENABLED: "true"    # if using SSL to Postgres [3](https://github.com/CyferShepard/Jellystat)
-      # POSTGRES_SSL_REJECT_UNAUTHORIZED: "false"  # if using self-signed certs [3](https://github.com/CyferShepard/Jellystat)
-      # JS_BASE_URL: "/"                # base path if reverse-proxied under subpath [3](https://github.com/CyferShepard/Jellystat)
-      JS_USER: "admin"                # master override user (with JS_PASSWORD) [3](https://github.com/CyferShepard/Jellystat)
-      JS_PASSWORD: "uVHdI7R1Y8XsrPJ84sn2e7Jse9zjW7"        # master override password (with JS_USER) [3](https://github.com/CyferShepard/Jellystat)
+      POSTGRES_USER: jellystat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: '5432'
+      JWT_SECRET: ${JWT_SECRET}
+      TZ: America/Chicago
+      JS_USER: admin
+      JS_PASSWORD: ${JS_PASSWORD}
     volumes:
-      - jellystat-backup:/app/backend/backup-data   # where Jellystat stores backups per compose example [1](https://github.com/CyferShepard/Jellystat/blob/main/docker-compose.yml)
+    - jellystat-swarm_jellystat-backup:/app/backend/backup-data
     networks:
-      - jellystat-net
+    - jellystat-net
     ports:
-      - target: 3000
-        published: 3000
-        protocol: tcp
-        mode: host
+    - target: 3000
+      published: 3000
+      protocol: tcp
+      mode: host
     depends_on:
-      - jellystat-db
+    - jellystat-db
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.labels.deployment.target.jellystat == true
+        - node.labels.deployment.target.jellystat == true
       restart_policy:
         condition: on-failure
       resources:
         limits:
-          cpus: "1.0"
+          cpus: '1.0'
           memory: 1G
         reservations:
-          cpus: "0.25"
+          cpus: '0.25'
           memory: 256M
-
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ || exit 1"]
+      test:
+      - CMD-SHELL
+      - wget -qO- http://127.0.0.1:3000/ || exit 1
       interval: 15s
       timeout: 5s
       retries: 5
-
 networks:
   jellystat-net:
     driver: overlay
     attachable: true
-
 volumes:
-  jellystat-db-data:
-    driver: local
-  jellystat-backup:
-    driver: local
+  jellystat-swarm_jellystat-backup:
+    name: jellystat-swarm_jellystat-backup
