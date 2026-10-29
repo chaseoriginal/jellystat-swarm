@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: jellystat
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-    - jellystat-swarm_jellystat-backup:/app/backend/backup-data
+    - jellystat-swarm_jellystat-db-data:/var/lib/postgresql/data
     networks:
     - jellystat-net
     deploy:
@@ -39,12 +39,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_IP: jellystat-db
       POSTGRES_PORT: '5432'
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: kuvnlQN5eZdUFFDVhTFUTuR1UZDTPuOhfmEI4XdIQG9koPSTLkPFrermR1p7qLjdzAC2NQrF
       TZ: America/Chicago
       JS_USER: admin
-      JS_PASSWORD: ${JS_PASSWORD}
+      JS_PASSWORD: uVHdI7R1Y8XsrPJ84sn2e7Jse9zjW7
     volumes:
-    - jellystat-swarm_jellystat-backup:/app/backend/backup-data
+    - jellystat-swarm_jellystat-db-data:/var/lib/postgresql/data
     networks:
     - jellystat-net
     ports:
@@ -80,5 +80,5 @@ networks:
     driver: overlay
     attachable: true
 volumes:
-  jellystat-swarm_jellystat-backup:
-    name: jellystat-swarm_jellystat-backup
+  jellystat-swarm_jellystat-db-data:
+    name: jellystat-swarm_jellystat-db-data

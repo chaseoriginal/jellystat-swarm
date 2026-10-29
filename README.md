@@ -8,8 +8,8 @@ deployment and polls this repository for changes.
 | Portainer stack id | 24 |
 | Portainer host | ore-dock-110-4 |
 | Endpoint | - (id -) |
-| Swarm | whofnrgxv5ig |
-| Live service | jellystat-swarm_jellystat |
+| Swarm | True |
+| Live service | svc:jellystat-swarm_jellystat-db |
 | Git repo | https://github.com/chaseoriginal/jellystat-swarm |
 | Compose file | `docker-compose.yml` |
 | Auto-update poll | every 900s |
@@ -39,8 +39,8 @@ deployment and polls this repository for changes.
 ## Verifying a deployment
 
 ```bash
-docker service ls --filter name=jellystat-swarm_jellystat
-docker service inspect jellystat-swarm_jellystat --format '{{json .Spec.TaskTemplate.ContainerSpec.Mounts}}'
+docker service ls --filter name=svc:jellystat-swarm_jellystat-db
+docker service inspect svc:jellystat-swarm_jellystat-db --format '{{json .Spec.TaskTemplate.ContainerSpec.Mounts}}'
 ```
 
 A healthy stack shows `1/1` and the same volume names as before.
