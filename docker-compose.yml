@@ -1,6 +1,6 @@
 services:
   jellystat-db:
-    image: postgres:15.14
+    image: postgres:15.14@sha256:822f8795764a670160640888508b2a68ea5c4b045012c2de17e1d0447bdbdc99
     command:
     - postgres
     - -c
@@ -8,10 +8,9 @@ services:
     environment:
       POSTGRES_USER: jellystat
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: jellystat
     volumes:
     - jellystat-swarm_jellystat-db-data:/var/lib/postgresql/data
-    networks:
-    - jellystat-net
     deploy:
       placement:
         constraints:
@@ -43,10 +42,9 @@ services:
       TZ: America/Chicago
       JS_USER: admin
       JS_PASSWORD: uVHdI7R1Y8XsrPJ84sn2e7Jse9zjW7
+      POSTGRES_DB: jfstat
     volumes:
-    - jellystat-swarm_jellystat-db-data:/var/lib/postgresql/data
-    networks:
-    - jellystat-net
+    - jellystat-swarm_jellystat-backup:/app/backend/backup-data
     ports:
     - target: 3000
       published: 3000
@@ -82,3 +80,5 @@ networks:
 volumes:
   jellystat-swarm_jellystat-db-data:
     name: jellystat-swarm_jellystat-db-data
+  jellystat-swarm_jellystat-backup:
+    name: jellystat-swarm_jellystat-backup
