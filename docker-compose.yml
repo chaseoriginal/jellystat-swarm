@@ -32,7 +32,7 @@ services:
       timeout: 5s
       retries: 5
   jellystat:
-    image: cyfershepard/jellystat:latest
+    image: 1.1.12
     environment:
       POSTGRES_USER: jellystat
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
